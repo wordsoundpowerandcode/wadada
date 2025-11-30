@@ -435,9 +435,22 @@ async def process_completed_payment(payment_id: int, session: AsyncSession):
             session=session
         )
     
-    elif payment.payment_type in [PaymentType.PREMIUM_MONTHLY, PaymentType.PREMIUM_YEARLY]:
+    elif payment.payment_type in [
+        PaymentType.PREMIUM_DAILY,
+        PaymentType.PREMIUM_WEEKLY,
+        PaymentType.PREMIUM_MONTHLY,
+        PaymentType.PREMIUM_YEARLY
+    ]:
         # Activate premium subscription
-        duration_days = 30 if payment.payment_type == PaymentType.PREMIUM_MONTHLY else 365
+        if payment.payment_type == PaymentType.PREMIUM_DAILY:
+            duration_days = 1
+        elif payment.payment_type == PaymentType.PREMIUM_WEEKLY:
+            duration_days = 7
+        elif payment.payment_type == PaymentType.PREMIUM_MONTHLY:
+            duration_days = 30
+        else:  # YEARLY
+            duration_days = 365
+            
         expires_at = datetime.utcnow() + timedelta(days=duration_days)
         
         # Check if subscription exists
